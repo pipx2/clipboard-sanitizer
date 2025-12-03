@@ -10,5 +10,6 @@ if [ -z "$OUTPUT_DIR" ]; then
 fi
 mkdir -p "$OUTPUT_DIR"
 
-echo "Build clipboard-sanitizer..."
+echo "Building clipboard-sanitizer..."
 go build -o "$OUTPUT_DIR"/clipboard-sanitizer "$MAIN_PKG"
+echo "Binaries are found in $OUTPUT_DIR"
