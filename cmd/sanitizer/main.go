@@ -2,27 +2,45 @@ package main
 
 import (
 	"fmt"
-	"os"
-	"os/signal"
 
-	"github.com/pipx2/clipboard-sanitizer/internal/monitor"
+	"github.com/atotto/clipboard"
+	"github.com/pipx2/clipboard-sanitizer/internal/sanitize"
+	"fyne.io/fyne/v2/app"
+	"fyne.io/fyne/v2/container"
+	"fyne.io/fyne/v2/widget"
+	"fyne.io/fyne/v2"
 )
+
 func main() {
-	fmt.Println("Clipboard Sanitizer running... (Ctrl+C to stop)")
+	a := app.NewWithID("clipboard-sanitizer")
+	w := a.NewWindow("Clipboard Sanitizer")
 
-	// Stop gracefully on Ctrl+C
-	c := make(chan os.Signal, 1)
-	signal.Notify(c, os.Interrupt)
-	done := make(chan bool)
+	w.Resize(fyne.NewSize(300, 150))
 
-	go func() {
-		<-c
-		fmt.Println("\nStopping sanitizer...")
-		done <- true
-	}()
+	infoLabel := widget.NewLabel("Press 'Sanitize Now' to clean clipboard.")
+	sanitizeBtn := widget.NewButton("Sanitize Now", func() {
+		text, err := clipboard.ReadAll()
+		if err != nil {
+			infoLabel.SetText("Error reading clipboard: " + err.Error())
+			return
+		}
 
-	go monitor.Start() // start clipboard monitor
+		cleaned := sanitize.Run(text)
+		if err := clipboard.WriteAll(cleaned); err != nil {
+			infoLabel.SetText("Error writing clipboard: " + err.Error())
+			return
+		}
 
-	<-done // wait for interrupt
-	fmt.Println("Exited.")
+		infoLabel.SetText("Clipboard sanitized:\n" + cleaned)
+		fmt.Println("Sanitized:", cleaned)
+	})
+
+	w.SetContent(container.NewVBox(
+		infoLabel,
+		sanitizeBtn,
+	))
+
+	// Show the window and start the app
+	w.ShowAndRun()
 }
+
