@@ -1,6 +1,14 @@
-if [ -f "clipboard-sanitizer" ]; then
-    echo "Removing clipboard-sanitizer"
-    rm "clipboard-sanitizer"
+#!/bin/bash
+
+# Path to the main package
+MAIN_PKG="./cmd/sanitizer/"
+
+# Output directory
+OUTPUT_DIR="./build"
+if [ -z "$OUTPUT_DIR" ]; then
+    rm -rf "$OUTPUT_DIR"
 fi
+mkdir -p "$OUTPUT_DIR"
+
 echo "Build clipboard-sanitizer..."
-go build -o clipboard-sanitizer ./cmd/sanitizer/
+go build -o "$OUTPUT_DIR"/clipboard-sanitizer "$MAIN_PKG"

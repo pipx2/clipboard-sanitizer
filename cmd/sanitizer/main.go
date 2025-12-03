@@ -6,7 +6,7 @@ import (
 	"github.com/atotto/clipboard"  // Clipboard access
 	"github.com/pipx2/clipboard-sanitizer/internal/sanitize"  // Sanitization functions
 	"fyne.io/fyne/v2/app"  // Fyne app framework
-	"fyne.io/fyne/v2/container"  // Containers for layour
+	"fyne.io/fyne/v2/container"  // Containers for layout
 	"fyne.io/fyne/v2/widget"  // Widgets (buttons, labels, radio buttons)
 	"fyne.io/fyne/v2"  // Fyne core types
 )
@@ -35,6 +35,7 @@ func main() {
 	modes.Selected = "Redact"  // default selection
 
 	// Button to trigger sanitization
+	var cleaned string  // kept outside to share between callbacks
 	sanitizeBtn := widget.NewButton("Sanitize Now", func() {
 		// Read text from the system clipboard
 		text, err := clipboard.ReadAll()
@@ -44,7 +45,6 @@ func main() {
 		}
 
 		// Apply the selected sanitization method
-		var cleaned string
 		switch modes.Selected {
 		case "Redact":
 			cleaned = sanitize.Redact(text)
@@ -56,15 +56,22 @@ func main() {
 			cleaned = text
 		}
 
+
+		// Update the label with confirmation and print to console
+		infoLabel.SetText("Clipboard sanitized:\n" + cleaned)
+		fmt.Println("Sanitized:", cleaned)
+	})
+
+	// Add button to move sanitized to clipboard
+	updateClipboardBtn := widget.NewButton("Update Clipboard", func() {
 		// Write the sanitized text back to the clipboard
 		if err := clipboard.WriteAll(cleaned); err != nil {
 			infoLabel.SetText("Error writing clipboard: " + err.Error())
 			return
 		}
 
-		// Update the label with confirmation and print to console
-		infoLabel.SetText("Clipboard sanitized:\n" + cleaned)
-		fmt.Println("Sanitized:", cleaned)
+		// If clipboard write was successful
+		infoLabel.SetText("Clipboard updated successfully!")
 	})
 
 	// Arrange widgets vertically in the window
@@ -72,6 +79,7 @@ func main() {
 		infoLabel,
 		modes,
 		sanitizeBtn,
+		updateClipboardBtn,
 	))
 
 	// Show the window and start the application event loop

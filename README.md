@@ -37,7 +37,7 @@ Use the provided build script:
 Run the application:
 
 ```bash
-./clipboard-sanitizer
+./build/clipboard-sanitizer
 ```
 
 The GUI will open, allowing you to select sanitization mode and sanitize your clipboard.
